@@ -13,7 +13,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 BASE_DIR = Path(__file__).resolve().parent
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder=str(BASE_DIR))
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 
 database_url = os.environ.get("DATABASE_URL", "sqlite:///local.db")
@@ -177,7 +177,7 @@ def logout():
 @app.get("/")
 @login_required
 def dashboard():
-    return send_file(BASE_DIR / "private_app" / "index.html")
+    return send_file(BASE_DIR / "index.html")
 
 
 @app.get("/api/me")
