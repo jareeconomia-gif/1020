@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DBS · Acceso</title>
+<style>
+:root{--orange:#FA5000;--ink:#161222;--muted:#746D89;--border:#E4E0EF;--surface:#F7F5FA}
+*{box-sizing:border-box}body{margin:0;font-family:"Segoe UI",Arial,sans-serif;background:#fff;color:var(--ink);min-height:100vh;display:grid;place-items:center}
+.shell{width:min(980px,92vw);display:grid;grid-template-columns:1.15fr .85fr;border:1px solid var(--border);min-height:560px}
+.brand{padding:58px;display:flex;flex-direction:column;justify-content:space-between;border-right:1px solid var(--border)}
+.mark{display:flex;align-items:center;gap:12px}.dragon{width:42px;height:42px;border:5px solid var(--orange);border-right-color:transparent;border-radius:50%;transform:rotate(-22deg)}
+.brand h1{font-size:54px;line-height:1;margin:0;letter-spacing:-.04em}.brand h1 span{color:var(--orange)}
+.brand p{color:var(--muted);font-size:16px;max-width:460px;line-height:1.55}
+.login{padding:58px 48px;display:flex;flex-direction:column;justify-content:center;background:var(--surface)}
+.login h2{font-size:28px;margin:0 0 8px}.login>p{color:var(--muted);margin:0 0 28px}
+label{display:block;font-size:13px;font-weight:700;margin:16px 0 7px}
+input{width:100%;padding:14px;border:1px solid var(--border);background:#fff;font-size:15px;outline:none}input:focus{border-color:var(--orange)}
+button{width:100%;margin-top:22px;padding:14px;border:0;background:var(--orange);color:#fff;font-weight:800;font-size:15px;cursor:pointer}
+.flash{padding:11px 12px;border-left:3px solid var(--orange);background:#fff;margin-bottom:12px;font-size:13px}
+.small{font-size:12px;color:var(--muted);margin-top:18px}
+@media(max-width:760px){.shell{grid-template-columns:1fr}.brand{display:none}.login{min-height:520px;padding:36px}}
+</style></head>
+<body><main class="shell">
+<section class="brand">
+<div class="mark"><div class="dragon"></div><div><b>DBS</b><div style="font-size:12px;color:#746D89">Presupuesto corporativo</div></div></div>
+<div><h1>Control<br><span>presupuestal.</span></h1><p>Acceso multiusuario al P&L corporativo, presupuesto, nómina y análisis por dirección.</p></div>
+<div style="font-size:12px;color:#746D89">Grupo Industrial Durandco</div>
+</section>
+<section class="login">
+<h2>Iniciar sesión</h2><p>Usa tu cuenta autorizada.</p>
+{% with messages = get_flashed_messages(with_categories=true) %}{% for category,message in messages %}<div class="flash">{{ message }}</div>{% endfor %}{% endwith %}
+<form method="post">
+<label>Correo</label><input type="email" name="email" required autocomplete="email">
+<label>Contraseña</label><input type="password" name="password" required autocomplete="current-password">
+<button type="submit">Entrar al P&L</button>
+</form>
+<div class="small">Los accesos son administrados por DBS.</div>
+</section></main></body></html>

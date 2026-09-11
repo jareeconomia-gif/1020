@@ -1,0 +1,28 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DBS · Usuarios</title><style>
+:root{--orange:#FA5000;--ink:#161222;--muted:#746D89;--border:#E4E0EF;--surface:#F7F5FA}
+*{box-sizing:border-box}body{margin:0;font-family:"Segoe UI",Arial,sans-serif;color:var(--ink)}header{height:72px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 5vw}a{color:var(--orange);text-decoration:none;font-weight:700}
+main{width:min(1180px,92vw);margin:34px auto}.grid{display:grid;grid-template-columns:360px 1fr;gap:28px}.panel{border:1px solid var(--border);padding:22px}h1,h2{margin-top:0}
+label{display:block;font-size:12px;font-weight:700;margin:13px 0 6px}input,select{width:100%;padding:10px;border:1px solid var(--border);background:#fff}button{padding:9px 12px;border:0;background:var(--orange);color:#fff;font-weight:700;cursor:pointer}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:11px 9px;border-bottom:1px solid var(--border);text-align:left}th{background:var(--surface)}
+.badge{padding:3px 7px;background:var(--surface);border:1px solid var(--border);font-size:11px}.off{opacity:.5}.flash{padding:10px;border-left:3px solid var(--orange);background:var(--surface);margin-bottom:12px}
+.inline{display:flex;gap:6px;align-items:center}.inline input{width:150px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}.panel{overflow:auto}}
+</style></head><body>
+<header><div><b>DBS</b> · Administración de usuarios</div><div><a href="/">Volver al P&L</a> &nbsp; <a href="/logout">Salir</a></div></header>
+<main>
+{% with messages = get_flashed_messages(with_categories=true) %}{% for category,message in messages %}<div class="flash">{{ message }}</div>{% endfor %}{% endwith %}
+<div class="grid">
+<section class="panel"><h2>Nuevo usuario</h2><form method="post" action="/admin/users/create">
+<label>Nombre</label><input name="name" required>
+<label>Correo</label><input name="email" type="email" required>
+<label>Contraseña inicial</label><input name="password" type="password" minlength="8" required>
+<label>Rol</label><select name="role"><option value="viewer">Viewer · solo lectura</option><option value="editor">Editor · puede cargar balanza</option><option value="admin">Admin · usuarios y balanza</option></select>
+<button style="margin-top:16px" type="submit">Crear usuario</button></form></section>
+<section class="panel"><h2>Usuarios</h2><table><thead><tr><th>Usuario</th><th>Rol</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>
+{% for u in users %}<tr class="{{ '' if u.active else 'off' }}"><td><b>{{u.name}}</b><br><span style="color:#746D89">{{u.email}}</span></td><td><span class="badge">{{u.role}}</span></td><td>{{'Activo' if u.active else 'Inactivo'}}</td>
+<td><div class="inline">
+{% if u.id != current_user.id %}<form method="post" action="/admin/users/{{u.id}}/toggle"><button type="submit">{{'Desactivar' if u.active else 'Activar'}}</button></form>{% endif %}
+<form method="post" action="/admin/users/{{u.id}}/password"><input name="password" type="password" minlength="8" placeholder="Nueva contraseña"><button type="submit">Cambiar</button></form>
+</div></td></tr>{% endfor %}
+</tbody></table></section></div></main></body></html>
