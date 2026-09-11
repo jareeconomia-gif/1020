@@ -3,16 +3,14 @@ from datetime import datetime, timezone
 from functools import wraps
 from pathlib import Path
 
-from flask import Flask, jsonify, redirect, render_template, request, send_file, url_for, flash
+from flask import Flask, jsonify, redirect, render_template, request, url_for, flash
 from flask_login import LoginManager, UserMixin, current_user, login_required, login_user, logout_user
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import IntegrityError
 from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.security import check_password_hash, generate_password_hash
 
-
 BASE_DIR = Path(__file__).resolve().parent
-
 app = Flask(__name__, template_folder=str(BASE_DIR))
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 
@@ -49,7 +47,7 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(255), unique=True, nullable=False, index=True)
     name = db.Column(db.String(160), nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
-    role = db.Column(db.String(30), nullable=False, default="viewer")  # admin/editor/viewer
+    role = db.Column(db.String(30), nullable=False, default="viewer")
     active = db.Column(db.Boolean, nullable=False, default=True)
     created_at = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow)
     last_login_at = db.Column(db.DateTime(timezone=True), nullable=True)
@@ -91,13 +89,11 @@ def load_user(user_id):
 
 
 def log_action(action, detail=None):
-    db.session.add(
-        AuditLog(
-            user_email=current_user.email if current_user.is_authenticated else None,
-            action=action,
-            detail=detail,
-        )
-    )
+    db.session.add(AuditLog(
+        user_email=current_user.email if current_user.is_authenticated else None,
+        action=action,
+        detail=detail,
+    ))
     db.session.commit()
 
 
@@ -121,7 +117,6 @@ def bootstrap():
     admin_email = (os.environ.get("ADMIN_EMAIL") or "").strip().lower()
     admin_password = os.environ.get("ADMIN_PASSWORD") or ""
     admin_name = os.environ.get("ADMIN_NAME") or "Administrador DBS"
-
     if admin_email and admin_password and not User.query.filter_by(email=admin_email).first():
         u = User(email=admin_email, name=admin_name, role="admin", active=True)
         u.set_password(admin_password)
@@ -145,22 +140,18 @@ def health():
 def login():
     if current_user.is_authenticated:
         return redirect(url_for("dashboard"))
-
     if request.method == "POST":
-        email = (request.form.get("email") or "").strip().lower()
+        username = (request.form.get("email") or "").strip().lower()
         password = request.form.get("password") or ""
-        user = User.query.filter_by(email=email).first()
-
+        user = User.query.filter_by(email=username).first()
         if not user or not user.active or not user.check_password(password):
-            flash("Correo o contraseña incorrectos.", "error")
+            flash("Usuario o contraseña incorrectos.", "error")
             return render_template("login.html"), 401
-
         login_user(user, remember=True)
         user.last_login_at = utcnow()
         db.session.commit()
         log_action("login")
         return redirect(url_for("dashboard"))
-
     return render_template("login.html")
 
 
@@ -177,20 +168,29 @@ def logout():
 @app.get("/")
 @login_required
 def dashboard():
-    return send_file(BASE_DIR / "index.html")
+    html = (BASE_DIR / "index.html").read_text(encoding="utf-8")
+    loader = """
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script>
+if (typeof JSZip === 'undefined') {
+  document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"><\\/script>');
+}
+</script>
+"""
+    if "cdn.jsdelivr.net/npm/jszip@3.10.1" not in html:
+        html = html.replace("</head>", loader + "\n</head>", 1)
+    return app.response_class(html, mimetype="text/html")
 
 
 @app.get("/api/me")
 @login_required
 def api_me():
-    return jsonify(
-        {
-            "id": current_user.id,
-            "email": current_user.email,
-            "name": current_user.name,
-            "role": current_user.role,
-        }
-    )
+    return jsonify({
+        "id": current_user.id,
+        "email": current_user.email,
+        "name": current_user.name,
+        "role": current_user.role,
+    })
 
 
 @app.get("/api/state")
@@ -198,24 +198,20 @@ def api_me():
 def get_shared_state():
     state = db.session.get(SharedState, 1)
     if not state or not state.actual_rows:
-        return jsonify(
-            {
-                "actual_rows": None,
-                "uploaded_name": None,
-                "version": 0,
-                "updated_at": None,
-                "updated_by": None,
-            }
-        )
-    return jsonify(
-        {
-            "actual_rows": state.actual_rows,
-            "uploaded_name": state.uploaded_name,
-            "version": state.version,
-            "updated_at": state.updated_at.isoformat() if state.updated_at else None,
-            "updated_by": state.updated_by_email,
-        }
-    )
+        return jsonify({
+            "actual_rows": None,
+            "uploaded_name": None,
+            "version": 0,
+            "updated_at": None,
+            "updated_by": None,
+        })
+    return jsonify({
+        "actual_rows": state.actual_rows,
+        "uploaded_name": state.uploaded_name,
+        "version": state.version,
+        "updated_at": state.updated_at.isoformat() if state.updated_at else None,
+        "updated_by": state.updated_by_email,
+    })
 
 
 @app.post("/api/state")
@@ -224,29 +220,24 @@ def save_shared_state():
     payload = request.get_json(silent=True) or {}
     rows = payload.get("actual_rows")
     uploaded_name = (payload.get("uploaded_name") or "")[:255]
-
     if not isinstance(rows, list) or not rows:
         return jsonify({"error": "La balanza procesada no contiene movimientos válidos."}), 400
     if len(rows) > 250000:
         return jsonify({"error": "La balanza excede el límite de movimientos permitido."}), 413
-
     state = db.session.get(SharedState, 1)
     if not state:
         state = SharedState(id=1, version=0)
         db.session.add(state)
-
     state.actual_rows = rows
     state.uploaded_name = uploaded_name
     state.updated_by_email = current_user.email
     state.updated_at = utcnow()
     state.version = (state.version or 0) + 1
-    db.session.add(
-        AuditLog(
-            user_email=current_user.email,
-            action="actualizar_balanza",
-            detail=f"{uploaded_name} · {len(rows)} movimientos · versión {state.version}",
-        )
-    )
+    db.session.add(AuditLog(
+        user_email=current_user.email,
+        action="actualizar_balanza",
+        detail=f"{uploaded_name} · {len(rows)} movimientos · versión {state.version}",
+    ))
     db.session.commit()
     return jsonify({"ok": True, "version": state.version})
 
@@ -265,8 +256,7 @@ def reset_shared_state():
 @app.get("/admin/users")
 @roles_required("admin")
 def admin_users():
-    users = User.query.order_by(User.created_at.asc()).all()
-    return render_template("admin_users.html", users=users)
+    return render_template("admin_users.html", users=User.query.order_by(User.created_at.asc()).all())
 
 
 @app.post("/admin/users/create")
@@ -276,26 +266,18 @@ def admin_create_user():
     name = (request.form.get("name") or "").strip()
     password = request.form.get("password") or ""
     role = request.form.get("role") or "viewer"
-
     if role not in {"admin", "editor", "viewer"}:
         role = "viewer"
     if not email or not name or len(password) < 8:
-        flash("Completa nombre, correo y una contraseña de al menos 8 caracteres.", "error")
+        flash("Completa nombre, usuario y una contraseña de al menos 8 caracteres.", "error")
         return redirect(url_for("admin_users"))
     if User.query.filter_by(email=email).first():
-        flash("Ese correo ya existe.", "error")
+        flash("Ese usuario ya existe.", "error")
         return redirect(url_for("admin_users"))
-
     user = User(email=email, name=name, role=role, active=True)
     user.set_password(password)
     db.session.add(user)
-    db.session.add(
-        AuditLog(
-            user_email=current_user.email,
-            action="crear_usuario",
-            detail=f"{email} · {role}",
-        )
-    )
+    db.session.add(AuditLog(user_email=current_user.email, action="crear_usuario", detail=f"{email} · {role}"))
     db.session.commit()
     flash("Usuario creado.", "ok")
     return redirect(url_for("admin_users"))
@@ -311,15 +293,12 @@ def admin_toggle_user(user_id):
     if user.id == current_user.id:
         flash("No puedes desactivar tu propio usuario.", "error")
         return redirect(url_for("admin_users"))
-
     user.active = not user.active
-    db.session.add(
-        AuditLog(
-            user_email=current_user.email,
-            action="cambiar_estado_usuario",
-            detail=f"{user.email} · {'activo' if user.active else 'inactivo'}",
-        )
-    )
+    db.session.add(AuditLog(
+        user_email=current_user.email,
+        action="cambiar_estado_usuario",
+        detail=f"{user.email} · {'activo' if user.active else 'inactivo'}",
+    ))
     db.session.commit()
     return redirect(url_for("admin_users"))
 
@@ -335,13 +314,7 @@ def admin_change_password(user_id):
         flash("La contraseña debe tener al menos 8 caracteres.", "error")
     else:
         user.set_password(password)
-        db.session.add(
-            AuditLog(
-                user_email=current_user.email,
-                action="cambiar_password_usuario",
-                detail=user.email,
-            )
-        )
+        db.session.add(AuditLog(user_email=current_user.email, action="cambiar_password_usuario", detail=user.email))
         db.session.commit()
         flash("Contraseña actualizada.", "ok")
     return redirect(url_for("admin_users"))
