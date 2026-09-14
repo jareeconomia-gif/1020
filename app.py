@@ -192,6 +192,12 @@ if (typeof JSZip === 'undefined') {
         global_filters = global_filters_path.read_text(encoding="utf-8")
         html = html.replace("</body>", f"\n<script>\n{global_filters}\n</script>\n</body>", 1)
 
+    # Corrección robusta del click en categorías para abrir el treemap.
+    category_click_fix_path = BASE_DIR / "category_click_fix.js"
+    if category_click_fix_path.exists():
+        category_click_fix = category_click_fix_path.read_text(encoding="utf-8")
+        html = html.replace("</body>", f"\n<script>\n{category_click_fix}\n</script>\n</body>", 1)
+
     return app.response_class(html, mimetype="text/html")
 
 
