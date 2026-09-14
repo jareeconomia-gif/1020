@@ -186,6 +186,12 @@ if (typeof JSZip === 'undefined') {
         ui_override = ui_override_path.read_text(encoding="utf-8")
         html = html.replace("</body>", f"\n<script>\n{ui_override}\n</script>\n</body>", 1)
 
+    # Los filtros del Dashboard son globales para P&L y Comparativo.
+    global_filters_path = BASE_DIR / "global_filters.js"
+    if global_filters_path.exists():
+        global_filters = global_filters_path.read_text(encoding="utf-8")
+        html = html.replace("</body>", f"\n<script>\n{global_filters}\n</script>\n</body>", 1)
+
     return app.response_class(html, mimetype="text/html")
 
 
