@@ -9,6 +9,29 @@
   };
   let syncing = false;
 
+  function installAreaChartExpansion() {
+    if (document.getElementById('dbs-area-chart-expand')) return;
+    const style = document.createElement('style');
+    style.id = 'dbs-area-chart-expand';
+    style.textContent = `
+      #page-dashboard .oec-area-viz {
+        display:grid !important;
+        grid-template-columns:minmax(0,1fr) !important;
+        gap:0 !important;
+        width:100% !important;
+      }
+      #page-dashboard .oec-area-controls {
+        display:none !important;
+      }
+      #page-dashboard .oec-area-chart,
+      #page-dashboard .oec-area-bars {
+        width:100% !important;
+        max-width:none !important;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
   function isPresidencia(value) {
     return String(value || '').trim().toLowerCase() === 'presidencia';
   }
@@ -296,6 +319,7 @@
   }
 
   function boot() {
+    installAreaChartExpansion();
     installDashboardHooks();
     installPnlHooks();
     installCompareHooks();
