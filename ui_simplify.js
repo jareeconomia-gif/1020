@@ -57,24 +57,41 @@
         border:1px solid #F7C6B2 !important;
         border-radius:28px !important;
         background:#FFF9F6 !important;
-        padding:22px 24px !important;
+        padding:16px 18px !important;
         display:grid !important;
-        grid-template-columns:1fr 1fr !important;
-        gap:12px !important;
+        grid-template-columns:1fr !important;
+        gap:10px !important;
       }
       #page-dashboard .target-real-group .metric-block {
         border:0 !important;
         border-radius:0 !important;
-        background:transparent !important;
-        min-height:78px !important;
-        padding:8px 10px !important;
+        background:#FFFFFF !important;
+        min-height:58px !important;
+        padding:10px 14px !important;
+        overflow:visible !important;
+      }
+      #page-dashboard .target-real-group .metric-number {
+        font-size:26px !important;
+        line-height:30px !important;
+        white-space:nowrap !important;
+        letter-spacing:-.03em !important;
+      }
+      #page-dashboard .target-real-group .metric-label {
+        margin-top:3px !important;
+        font-size:10px !important;
+        line-height:14px !important;
       }
       #page-dashboard .target-real-group .target-total {
-        grid-column:1 / -1 !important;
-        border-top:1px solid #F1DFD7 !important;
-        padding-top:16px !important;
+        grid-column:1 !important;
+        border-top:0 !important;
+        background:#FBF2EE !important;
+        padding:14px 16px !important;
+        min-height:72px !important;
       }
-      #page-dashboard .target-real-group .target-total .metric-number { font-size:34px !important; }
+      #page-dashboard .target-real-group .target-total .metric-number {
+        font-size:30px !important;
+        line-height:34px !important;
+      }
       #page-dashboard .target-budget { grid-column:2; grid-row:1; }
       #page-dashboard .target-vs { grid-column:3; grid-row:1; }
       #page-dashboard .target-consumed { grid-column:3; grid-row:2; }
