@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Centro P&L · Grupo Industrial Durandco</title>
+<style>
+:root{--ink:#17131f;--muted:#7a7488;--line:#e8e1f1;--orange:#fa5000;--orange2:#e8460c;--bg:#fbfafc;--card:#fff;--navy:#071a2a;--cyan:#58c5dc}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,"Segoe UI",Arial,sans-serif;color:var(--ink);background:linear-gradient(180deg,#fff 0,#fbfafc 100%);min-height:100vh}.top{height:78px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 clamp(22px,6vw,88px);background:rgba(255,255,255,.94);position:sticky;top:0;z-index:10}.brand{display:flex;align-items:center;gap:12px}.mark{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--orange),#ff8a4c);display:grid;place-items:center;color:white;font-weight:900;font-size:18px}.brand b{display:block;font-size:15px}.brand span{font-size:11px;color:var(--muted)}.user{display:flex;gap:14px;align-items:center;font-size:12px}.logout{color:var(--orange);text-decoration:none;font-weight:800}.wrap{max-width:1240px;margin:0 auto;padding:70px 34px 90px}.eyebrow{color:var(--orange);font-weight:800;font-size:12px;letter-spacing:.12em;text-transform:uppercase}.hero h1{font-size:clamp(38px,5vw,68px);line-height:.98;letter-spacing:-.055em;margin:12px 0 18px;max-width:820px}.hero p{font-size:16px;line-height:1.6;color:var(--muted);max-width:700px;margin:0}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:48px}.card{position:relative;min-height:235px;border:1px solid var(--line);border-radius:28px;background:var(--card);padding:28px;text-decoration:none;color:inherit;overflow:hidden;transition:.22s ease;box-shadow:0 14px 36px rgba(34,20,52,.035)}.card:hover{transform:translateY(-3px);box-shadow:0 22px 48px rgba(34,20,52,.09);border-color:#d8cce8}.card::after{content:"";position:absolute;width:180px;height:180px;border-radius:50%;right:-75px;bottom:-95px;background:#f5effa}.card.dbs::after{background:#fff0e8}.card.shipping{background:linear-gradient(145deg,#071827,#0a2638);color:#fff;border-color:#173c51}.card.shipping::after{background:rgba(88,197,220,.12)}.status{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border-radius:999px;background:#f8f3fb;color:#726783;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em}.available{background:#fff0e8;color:var(--orange2)}.shipping .available{background:rgba(88,197,220,.12);color:#8ae5f3}.card h2{font-size:29px;margin:35px 0 8px;letter-spacing:-.035em}.card p{margin:0;color:var(--muted);line-height:1.5;max-width:430px;font-size:13px}.shipping p{color:#93adbb}.arrow{position:absolute;right:28px;top:28px;width:42px;height:42px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font-size:20px;font-weight:500}.shipping .arrow{border-color:#2e5368}.soon{opacity:.78}.soon:hover{transform:none;box-shadow:0 14px 36px rgba(34,20,52,.035)}.footer{margin-top:34px;color:#aaa2b4;font-size:11px}@media(max-width:780px){.grid{grid-template-columns:1fr}.wrap{padding:48px 20px 70px}.top{padding:0 20px}.user span{display:none}}
+</style>
+</head>
+<body>
+<header class="top"><div class="brand"><div class="mark">D</div><div><b>Centro P&amp;L</b><span>Grupo Industrial Durandco</span></div></div><div class="user"><span>{{ current_user.name }} · {{ current_user.role }}</span><a class="logout" href="{{ url_for('logout') }}">Salir</a></div></header>
+<main class="wrap">
+<section class="hero"><div class="eyebrow">Procesadores financieros</div><h1>Selecciona el negocio que quieres analizar.</h1><p>Un solo acceso para entrar al procesador P&amp;L correspondiente a cada operación. DBS y Shipping ya están disponibles; SUBTEC y Oil &amp; Gas quedarán conectados aquí.</p></section>
+<section class="grid">
+<a class="card dbs" href="{{ url_for('dashboard') }}"><span class="status available">Disponible</span><span class="arrow">→</span><h2>DBS</h2><p>Presupuesto corporativo, P&amp;L, comparativos y actualización de balanza SAP.</p></a>
+<a class="card shipping" href="{{ url_for('shipping') }}"><span class="status available">Disponible</span><span class="arrow">→</span><h2>Shipping</h2><p>Procesador P&amp;L corporativo de flota, barcos, costos, márgenes y análisis ejecutivo.</p></a>
+<a class="card soon" href="{{ url_for('subtec') }}"><span class="status">Próximamente</span><span class="arrow">→</span><h2>SUBTEC</h2><p>Acceso reservado para el próximo procesador P&amp;L de SUBTEC.</p></a>
+<a class="card soon" href="{{ url_for('oil_gas') }}"><span class="status">Próximamente</span><span class="arrow">→</span><h2>Oil &amp; Gas</h2><p>Acceso reservado para el próximo procesador P&amp;L de Oil &amp; Gas.</p></a>
+</section>
+<div class="footer">Centro P&amp;L · DBS / Shipping / SUBTEC / Oil &amp; Gas</div>
+</main>
+</body></html>
