@@ -46,7 +46,7 @@
       #page-dashboard .dash-toolbar { margin:0 0 26px !important; }
       #page-dashboard .target-dashboard-metrics {
         display:grid !important;
-        grid-template-columns:minmax(320px,.95fr) minmax(230px,1fr) minmax(230px,1fr) !important;
+        grid-template-columns:minmax(390px,1.05fr) minmax(230px,1fr) minmax(230px,1fr) !important;
         grid-template-rows:auto auto !important;
         gap:16px !important;
         margin:0 0 34px !important;
@@ -58,26 +58,35 @@
         border-radius:28px !important;
         background:#FFF9F6 !important;
         padding:16px 18px !important;
-        display:grid !important;
-        grid-template-columns:1fr !important;
+        display:flex !important;
+        flex-direction:column !important;
+        align-items:stretch !important;
         gap:10px !important;
+        min-width:0 !important;
+        overflow:hidden !important;
+        box-sizing:border-box !important;
       }
       #page-dashboard .target-real-group .metric-block {
         border:0 !important;
         border-radius:0 !important;
         background:#FFFFFF !important;
         min-height:58px !important;
+        width:100% !important;
+        min-width:0 !important;
         padding:10px 14px !important;
+        box-sizing:border-box !important;
         overflow:visible !important;
+        flex:0 0 auto !important;
       }
       #page-dashboard .target-real-group .metric-number {
-        font-size:26px !important;
-        line-height:30px !important;
+        font-size:clamp(22px,2vw,28px) !important;
+        line-height:1.08 !important;
         white-space:nowrap !important;
-        letter-spacing:-.03em !important;
+        letter-spacing:-.035em !important;
+        max-width:100% !important;
       }
       #page-dashboard .target-real-group .metric-label {
-        margin-top:3px !important;
+        margin-top:4px !important;
         font-size:10px !important;
         line-height:14px !important;
       }
@@ -87,10 +96,11 @@
         background:#FBF2EE !important;
         padding:14px 16px !important;
         min-height:72px !important;
+        width:100% !important;
       }
       #page-dashboard .target-real-group .target-total .metric-number {
-        font-size:30px !important;
-        line-height:34px !important;
+        font-size:clamp(25px,2.35vw,32px) !important;
+        line-height:1.08 !important;
       }
       #page-dashboard .target-budget { grid-column:2; grid-row:1; }
       #page-dashboard .target-vs { grid-column:3; grid-row:1; }
@@ -131,14 +141,31 @@
       #page-upload #uploadKpis + div { display:none !important; }
       #page-upload .upload-zone { max-width:100% !important; }
 
+      @media (max-width:1180px) and (min-width:1051px) {
+        #page-dashboard .target-dashboard-metrics {
+          grid-template-columns:minmax(350px,1.05fr) minmax(210px,1fr) minmax(210px,1fr) !important;
+        }
+        #page-dashboard .target-real-group .metric-number { font-size:22px !important; }
+        #page-dashboard .target-real-group .target-total .metric-number { font-size:26px !important; }
+      }
+
       @media (max-width:1050px) {
         #page-dashboard .target-dashboard-metrics { grid-template-columns:1fr 1fr !important; grid-template-rows:auto !important; }
         #page-dashboard .target-real-group { grid-column:1 / -1 !important; grid-row:auto !important; }
+        #page-dashboard .target-real-group .metric-number { font-size:clamp(22px,4vw,30px) !important; }
+        #page-dashboard .target-real-group .target-total .metric-number { font-size:clamp(26px,4.5vw,34px) !important; }
         #page-dashboard .target-budget,
         #page-dashboard .target-vs,
         #page-dashboard .target-consumed { grid-column:auto !important; grid-row:auto !important; }
         #page-dashboard .target-dashboard-charts { grid-template-columns:1fr !important; }
         #page-area .pnl-layout { grid-template-columns:1fr !important; }
+      }
+
+      @media (max-width:620px) {
+        #page-dashboard .target-dashboard-metrics { grid-template-columns:1fr !important; }
+        #page-dashboard .target-real-group { padding:14px !important; }
+        #page-dashboard .target-real-group .metric-number { font-size:24px !important; }
+        #page-dashboard .target-real-group .target-total .metric-number { font-size:28px !important; }
       }
     `;
     document.head.appendChild(style);
