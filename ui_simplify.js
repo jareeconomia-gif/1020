@@ -43,6 +43,37 @@
       #page-dashboard #dash-panel-nomina,
       #page-dashboard #dash-panel-historial { display:none !important; }
       #page-dashboard #dash-panel-resumen { display:block !important; }
+      #page-dashboard.category-detail-open #dash-panel-categorias {
+        display:block !important;
+        margin-top:26px !important;
+        padding-top:4px !important;
+      }
+      #page-dashboard.category-detail-open #dash-panel-categorias .section-title {
+        margin-bottom:12px !important;
+      }
+      #page-dashboard.category-detail-open #dash-panel-categorias .category-layout {
+        display:grid !important;
+        grid-template-columns:minmax(0,1.45fr) minmax(280px,.55fr) !important;
+        gap:22px !important;
+        align-items:start !important;
+      }
+      #page-dashboard.category-detail-open #dashCategoryTreemap {
+        min-height:480px !important;
+        height:480px !important;
+      }
+      #page-dashboard .category-detail-close {
+        appearance:none;
+        border:1px solid #E4E0EF;
+        background:#fff;
+        color:#161222;
+        border-radius:999px;
+        padding:9px 14px;
+        font:700 12px/1 'Plus Jakarta Sans','Segoe UI',Arial,sans-serif;
+        cursor:pointer;
+        margin-left:auto;
+      }
+      #page-dashboard .category-detail-close:hover { border-color:#FA5000; color:#FA5000; }
+
       #page-dashboard .dash-toolbar { margin:0 0 26px !important; }
       #page-dashboard .target-dashboard-metrics {
         display:grid !important;
@@ -158,6 +189,8 @@
         #page-dashboard .target-vs,
         #page-dashboard .target-consumed { grid-column:auto !important; grid-row:auto !important; }
         #page-dashboard .target-dashboard-charts { grid-template-columns:1fr !important; }
+        #page-dashboard.category-detail-open #dash-panel-categorias .category-layout { grid-template-columns:1fr !important; }
+        #page-dashboard.category-detail-open #dashCategoryTreemap { min-height:420px !important; height:420px !important; }
         #page-area .pnl-layout { grid-template-columns:1fr !important; }
       }
 
@@ -166,6 +199,7 @@
         #page-dashboard .target-real-group { padding:14px !important; }
         #page-dashboard .target-real-group .metric-number { font-size:24px !important; }
         #page-dashboard .target-real-group .target-total .metric-number { font-size:28px !important; }
+        #page-dashboard.category-detail-open #dashCategoryTreemap { min-height:340px !important; height:340px !important; }
       }
     `;
     document.head.appendChild(style);
@@ -296,6 +330,60 @@
     if (firstLayout && !firstLayout.querySelector('.data-zone:not(.target-hidden-summary-zone)')) firstLayout.style.display = 'none';
   }
 
+  function ensureCategoryCloseButton() {
+    const panel = document.getElementById('dash-panel-categorias');
+    if (!panel || panel.querySelector('.category-detail-close')) return;
+    const title = panel.querySelector('.section-title');
+    if (!title) return;
+    title.style.display = 'flex';
+    title.style.alignItems = 'center';
+    title.style.gap = '16px';
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'category-detail-close';
+    btn.textContent = 'Cerrar detalle';
+    btn.onclick = () => {
+      document.getElementById('page-dashboard')?.classList.remove('category-detail-open');
+      if (typeof window.switchDashTab === 'function') window.switchDashTab('resumen');
+    };
+    title.appendChild(btn);
+  }
+
+  function openCategoryDetail() {
+    const page = document.getElementById('page-dashboard');
+    const panel = document.getElementById('dash-panel-categorias');
+    if (!page || !panel) return;
+    page.classList.add('category-detail-open');
+    ensureCategoryCloseButton();
+    requestAnimationFrame(() => {
+      panel.scrollIntoView({ behavior:'smooth', block:'start' });
+    });
+  }
+
+  function installCategoryClickBridge() {
+    if (document.documentElement.dataset.categoryBridge === '1') return;
+    document.documentElement.dataset.categoryBridge = '1';
+
+    document.addEventListener('click', (event) => {
+      const familyBar = event.target.closest('#dashTreemap .dash-bar-row, #dashTreemap .oec-cell');
+      const detailChip = event.target.closest('#dashCategoryChipsDetail .chip-filter');
+      if (familyBar || detailChip) {
+        setTimeout(() => {
+          openCategoryDetail();
+        }, 30);
+      }
+    });
+
+    const detailTreemap = document.getElementById('dashCategoryTreemap');
+    if (detailTreemap) {
+      new MutationObserver(() => {
+        if (document.getElementById('page-dashboard')?.classList.contains('category-detail-open')) {
+          ensureCategoryCloseButton();
+        }
+      }).observe(detailTreemap, { childList:true, subtree:true });
+    }
+  }
+
   function simplifyCompare() {
     const level = document.getElementById('compareLevel');
     if (level && level.value !== 'area') {
@@ -310,6 +398,8 @@
     configureDashboardOrder();
     rebuildMetricLayout();
     configureDashboardCharts();
+    installCategoryClickBridge();
+    ensureCategoryCloseButton();
     simplifyCompare();
     updatePageTitle();
 
@@ -332,6 +422,7 @@
     new MutationObserver(() => {
       configureNavigation();
       updatePageTitle();
+      ensureCategoryCloseButton();
     }).observe(main, { subtree: true, attributes: true, attributeFilter: ['class'] });
 
     document.addEventListener('click', () => setTimeout(() => {
