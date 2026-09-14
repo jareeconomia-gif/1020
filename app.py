@@ -179,6 +179,13 @@ if (typeof JSZip === 'undefined') {
 """
     if "cdn.jsdelivr.net/npm/jszip@3.10.1" not in html:
         html = html.replace("</head>", loader + "\n</head>", 1)
+
+    # UI productiva: únicamente Dashboard, P&L, Comparativo y Datos.
+    ui_override_path = BASE_DIR / "ui_simplify.js"
+    if ui_override_path.exists():
+        ui_override = ui_override_path.read_text(encoding="utf-8")
+        html = html.replace("</body>", f"\n<script>\n{ui_override}\n</script>\n</body>", 1)
+
     return app.response_class(html, mimetype="text/html")
 
 
