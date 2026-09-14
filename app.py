@@ -1,3 +1,5 @@
+import base64
+import lzma
 import os
 from datetime import datetime, timezone
 from functools import wraps
@@ -34,7 +36,7 @@ app.config.update(
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = "login"
-login_manager.login_message = "Inicia sesión para entrar al P&L."
+login_manager.login_message = "Inicia sesión para entrar al Centro P&L."
 login_manager.login_message_category = "info"
 
 
@@ -106,7 +108,7 @@ def roles_required(*roles):
                 if request.path.startswith("/api/"):
                     return jsonify({"error": "No tienes permisos para esta acción."}), 403
                 flash("No tienes permisos para esta sección.", "error")
-                return redirect(url_for("dashboard"))
+                return redirect(url_for("portal"))
             return fn(*args, **kwargs)
         return wrapped
     return decorator
@@ -131,15 +133,31 @@ with app.app_context():
     bootstrap()
 
 
+def inject_portal_button(html, label="Procesadores P&L"):
+    button = f"""
+<a href="/" title="Volver al Centro P&L" style="position:fixed;right:18px;bottom:18px;z-index:2147483000;text-decoration:none;background:#17131f;color:#fff;border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:10px 14px;font:700 11px/1 Inter,Segoe UI,Arial,sans-serif;box-shadow:0 12px 28px rgba(0,0,0,.18)">← {label}</a>
+"""
+    return html.replace("</body>", button + "\n</body>", 1) if "</body>" in html else html + button
+
+
+def load_shipping_html():
+    payload_dir = BASE_DIR / "shipping_payload"
+    parts = sorted(payload_dir.glob("part*.txt"))
+    if not parts:
+        raise FileNotFoundError("No se encontró el paquete del procesador Shipping.")
+    packed = "".join(p.read_text(encoding="utf-8").strip() for p in parts)
+    return lzma.decompress(base64.b64decode(packed)).decode("utf-8")
+
+
 @app.get("/health")
 def health():
-    return {"ok": True, "service": "dbs-pnl-multiuser"}, 200
+    return {"ok": True, "service": "pnl-center-multiuser"}, 200
 
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for("dashboard"))
+        return redirect(url_for("portal"))
     if request.method == "POST":
         username = (request.form.get("email") or "").strip().lower()
         password = request.form.get("password") or ""
@@ -151,7 +169,7 @@ def login():
         user.last_login_at = utcnow()
         db.session.commit()
         log_action("login")
-        return redirect(url_for("dashboard"))
+        return redirect(url_for("portal"))
     return render_template("login.html")
 
 
@@ -167,6 +185,12 @@ def logout():
 
 @app.get("/")
 @login_required
+def portal():
+    return render_template("portal.html")
+
+
+@app.get("/dbs")
+@login_required
 def dashboard():
     html = (BASE_DIR / "index.html").read_text(encoding="utf-8")
     loader = """
@@ -180,25 +204,50 @@ if (typeof JSZip === 'undefined') {
     if "cdn.jsdelivr.net/npm/jszip@3.10.1" not in html:
         html = html.replace("</head>", loader + "\n</head>", 1)
 
-    # UI productiva: únicamente Dashboard, P&L, Comparativo y Datos.
     ui_override_path = BASE_DIR / "ui_simplify.js"
     if ui_override_path.exists():
         ui_override = ui_override_path.read_text(encoding="utf-8")
         html = html.replace("</body>", f"\n<script>\n{ui_override}\n</script>\n</body>", 1)
 
-    # Los filtros del Dashboard son globales para P&L y Comparativo.
     global_filters_path = BASE_DIR / "global_filters.js"
     if global_filters_path.exists():
         global_filters = global_filters_path.read_text(encoding="utf-8")
         html = html.replace("</body>", f"\n<script>\n{global_filters}\n</script>\n</body>", 1)
 
-    # Corrección robusta del click en categorías para abrir el treemap.
     category_click_fix_path = BASE_DIR / "category_click_fix.js"
     if category_click_fix_path.exists():
         category_click_fix = category_click_fix_path.read_text(encoding="utf-8")
         html = html.replace("</body>", f"\n<script>\n{category_click_fix}\n</script>\n</body>", 1)
 
+    html = inject_portal_button(html)
     return app.response_class(html, mimetype="text/html")
+
+
+@app.get("/shipping")
+@login_required
+def shipping():
+    try:
+        html = load_shipping_html()
+    except Exception as exc:
+        return app.response_class(
+            f"<h1>No se pudo abrir Shipping</h1><p>{str(exc)}</p><p><a href='/'>Volver</a></p>",
+            status=500,
+            mimetype="text/html",
+        )
+    html = inject_portal_button(html)
+    return app.response_class(html, mimetype="text/html")
+
+
+@app.get("/subtec")
+@login_required
+def subtec():
+    return render_template("coming_soon.html", business="SUBTEC")
+
+
+@app.get("/oil-gas")
+@login_required
+def oil_gas():
+    return render_template("coming_soon.html", business="Oil & Gas")
 
 
 @app.get("/api/me")
