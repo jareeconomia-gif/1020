@@ -32,6 +32,120 @@
     document.head.appendChild(style);
   }
 
+  function installVisualFixes() {
+    if (document.getElementById('dbs-responsive-visual-fixes')) return;
+    const style = document.createElement('style');
+    style.id = 'dbs-responsive-visual-fixes';
+    style.textContent = `
+      /* Dashboard: importes completos y sin cortes */
+      #page-dashboard .target-real-group {
+        grid-template-columns:minmax(0,1.4fr) minmax(135px,.6fr) !important;
+        min-width:0 !important;
+      }
+      #page-dashboard .target-real-group .metric-block {
+        min-width:0 !important;
+        overflow:visible !important;
+      }
+      #page-dashboard .target-real-group .metric-number {
+        font-size:clamp(24px,2.05vw,36px) !important;
+        line-height:1.04 !important;
+        letter-spacing:-.035em !important;
+        white-space:nowrap !important;
+        overflow:visible !important;
+        text-overflow:clip !important;
+      }
+      #page-dashboard .target-real-group .target-total .metric-number {
+        font-size:clamp(25px,2.1vw,37px) !important;
+      }
+      #page-dashboard .target-real-group .metric-label {
+        font-size:11px !important;
+        line-height:1.25 !important;
+      }
+
+      /* P&L: composición visible y legible */
+      #page-area .pnl-layout {
+        grid-template-columns:minmax(0,1fr) minmax(390px,440px) !important;
+        gap:24px !important;
+        align-items:start !important;
+      }
+      #page-area .pnl-layout > * {
+        min-width:0 !important;
+      }
+      #page-area #compositionList {
+        display:grid !important;
+        grid-template-columns:1fr !important;
+        gap:10px !important;
+        width:100% !important;
+        min-width:0 !important;
+      }
+      #page-area #compositionList .comp-row {
+        width:100% !important;
+        min-width:0 !important;
+        max-width:100% !important;
+        overflow:hidden !important;
+      }
+      #page-area #compositionList .comp-head {
+        display:grid !important;
+        grid-template-columns:minmax(0,1fr) auto !important;
+        gap:12px !important;
+        align-items:start !important;
+        width:100% !important;
+        min-width:0 !important;
+        padding:14px 16px !important;
+      }
+      #page-area #compositionList .comp-main {
+        min-width:0 !important;
+      }
+      #page-area #compositionList .comp-name {
+        white-space:normal !important;
+        overflow:visible !important;
+        text-overflow:clip !important;
+        overflow-wrap:anywhere !important;
+        line-height:1.25 !important;
+      }
+      #page-area #compositionList .comp-ceco {
+        white-space:normal !important;
+        overflow-wrap:anywhere !important;
+      }
+      #page-area #compositionList .comp-values {
+        min-width:118px !important;
+        max-width:145px !important;
+        text-align:right !important;
+      }
+      #page-area #compositionList .comp-values b,
+      #page-area #compositionList .comp-values small {
+        display:block !important;
+        white-space:normal !important;
+        overflow-wrap:anywhere !important;
+      }
+
+      /* Si no cabe a la derecha, la composición pasa debajo y ocupa todo el ancho. */
+      @media (max-width:1350px) {
+        #page-area .pnl-layout {
+          grid-template-columns:1fr !important;
+        }
+        #page-area #compositionList {
+          grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+        }
+      }
+      @media (max-width:820px) {
+        #page-dashboard .target-real-group {
+          grid-template-columns:1fr !important;
+        }
+        #page-dashboard .target-real-group .target-total {
+          grid-column:1 !important;
+        }
+        #page-dashboard .target-real-group .metric-number {
+          font-size:clamp(26px,8vw,37px) !important;
+        }
+        #page-area #compositionList {
+          grid-template-columns:1fr !important;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
   function isPresidencia(value) {
     return String(value || '').trim().toLowerCase() === 'presidencia';
   }
@@ -311,6 +425,7 @@
 
   function onNavigation() {
     setTimeout(() => {
+      installVisualFixes();
       installDashboardHooks();
       installPnlHooks();
       installCompareHooks();
@@ -320,6 +435,7 @@
 
   function boot() {
     installAreaChartExpansion();
+    installVisualFixes();
     installDashboardHooks();
     installPnlHooks();
     installCompareHooks();
@@ -338,6 +454,7 @@
 
     const main = document.querySelector('main') || document.body;
     new MutationObserver(() => {
+      installVisualFixes();
       installDashboardHooks();
       installPnlHooks();
       installCompareHooks();
