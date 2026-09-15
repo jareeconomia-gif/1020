@@ -1,0 +1,1 @@
+Shipping processor payload parts. Generated from INDEX_PNL_SHIPPING_ESTILO_DBS_V7.html and reconstructed by app.py.
